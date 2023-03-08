@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <TextView
+        android:id="@+id/gameNameTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="16dp"
+        android:text="@string/name"
+        android:textColor="@color/brown"
+        android:textSize="58sp"
+        android:textStyle="bold"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <LinearLayout
+        android:id="@+id/scoreLayout"
+        style="@style/textLayoutStyle"
+        android:layout_marginStart="30dp"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/background"
+        android:orientation="vertical"
+        app:layout_constraintStart_toEndOf="@+id/gameNameTextView"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/score_textView"
+            style="@style/textStyle"
+            android:text="@string/score"
+            app:layout_constraintStart_toEndOf="@+id/gameNameTextView"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/scoreValue_textView"
+            style="@style/valuesStyle"
+            android:text="0"
+            app:layout_constraintStart_toEndOf="@+id/gameNameTextView"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/bestLayout"
+        style="@style/textLayoutStyle"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="5dp"
+        android:background="@drawable/background"
+        android:orientation="vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/scoreLayout"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            style="@style/textStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/best"
+            app:layout_constraintStart_toEndOf="@+id/textView"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            style="@style/valuesStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/name"
+            app:layout_constraintStart_toEndOf="@+id/textView"
+            app:layout_constraintTop_toTopOf="parent" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/gameExplainTextView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="25dp"
+        android:text="@string/playGame"
+        android:textColor="@color/brown"
+        android:textSize="23sp"
+        android:textStyle="bold"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/gameNameTextView" />
+
+    <TextView
+        android:id="@+id/gameExplainTextView2"
+        android:layout_width="310dp"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="6dp"
+        android:text="@string/gameExplain"
+        android:textColor="@color/brown"
+        android:textSize="21sp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/gameExplainTextView1" />
+
+    <androidx.appcompat.widget.AppCompatImageButton
+        android:id="@+id/newGameButton"
+        android:layout_width="55dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="10dp"
+        android:background="@drawable/background_button"
+        android:src="@drawable/replay"
+        android:text="@string/newGame"
+        android:textColor="#FFFF"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/bestLayout" />
+
+    <androidx.gridlayout.widget.GridLayout
+        android:id="@+id/gridlayout"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_margin="10dp"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/background_gridlayout"
+        android:padding="10dp"
+        app:columnCount="4"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/gameExplainTextView2"
+        app:rowCount="4">
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/cell1"
+            style="@style/cellsStyle"
+            android:backgroundTint="@color/score_best"
+            android:gravity="center" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/cell2"
+            style="@style/cellsStyle"
+            android:backgroundTint="@color/score_best"
+            android:gravity="center" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/cell3"
+            style="@style/cellsStyle"
+            android:backgroundTint="@color/score_best"
+            android:gravity="center" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/cell4"
+            style="@style/cellsStyle"
+            android:backgroundTint="@color/score_best"
+            android:gravity="center" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/cell5"
+            style="@style/cellsStyle"
+            android:backgroundTint="@color/score_best"
+            android:gravity="center" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/cell6"
+            style="@style/cellsStyle"
+            android:backgroundTint="@color/score_best"
+            android:gravity="center" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/cell7"
+            style="@style/cellsStyle"
+            android:backgroundTint="@color/score_best"
+            android:gravity="center" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/cell8"
+            style="@style/cellsStyle"
+            android:backgroundTint="@color/score_best"
+            android:gravity="center" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/cell9"
+            style="@style/cellsStyle"
+            android:backgroundTint="@color/score_best"
+            android:gravity="center" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/cell10"
+            style="@style/cellsStyle"
+            android:backgroundTint="@color/score_best"
+            android:gravity="center" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/cell11"
+            style="@style/cellsStyle"
+            android:backgroundTint="@color/score_best"
+            android:gravity="center" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/cell12"
+            style="@style/cellsStyle"
+            android:backgroundTint="@color/score_best"
+            android:gravity="center" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/cell13"
+            style="@style/cellsStyle"
+            android:backgroundTint="@color/score_best"
+            android:gravity="center" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/cell14"
+            style="@style/cellsStyle"
+            android:backgroundTint="@color/score_best"
+            android:gravity="center" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/cell15"
+            style="@style/cellsStyle"
+            android:backgroundTint="@color/score_best"
+            android:gravity="center" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/cell16"
+            style="@style/cellsStyle"
+            android:backgroundTint="@color/score_best"
+            android:gravity="center" />
+
+    </androidx.gridlayout.widget.GridLayout>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
