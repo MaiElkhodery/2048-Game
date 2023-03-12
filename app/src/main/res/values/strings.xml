@@ -3,7 +3,7 @@
     <string name="name">2048</string>
     <string name="newGame">New Game</string>
     <string name="score">Score</string>
-    <string name="best">Best</string>
+    <string name="best">Best Score</string>
     <string name="playGame">Play 2048 Game</string>
     <string name="gameExplain">Join the numbers and get to the 2048 tile!</string>
 </resources>
