@@ -11,5 +11,16 @@
     <color name="brown">#615047</color>
     <color name="light_brown">#8C6D5D</color>
     <color name="score_best">#B4ACA8</color>
-    <color name="gridColor">#9C8E88</color>
+    <color name="gridColor">#9F9186</color>
+    <color name="Color2">#EEE4DA</color>
+    <color name="Color4">#EDE0C8</color>
+    <color name="Color8">#F2B179</color>
+    <color name="Color16">#F59563</color>
+    <color name="Color32">#F67C5F</color>
+    <color name="Color64">#F65E3B</color>
+    <color name="Color128">#EDCF72</color>
+    <color name="Color256">#EDCC61</color>
+    <color name="Color512">#EDC850</color>
+    <color name="Color1024">#EDC53F</color>
+    <color name="Color2048">#EDC22E</color>
 </resources>

@@ -9,8 +9,8 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
-import android.widget.GridLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -87,8 +87,8 @@ public class MainActivity extends AppCompatActivity implements GestureDetector.O
 
         restartButton.setOnClickListener(view -> restart());
 
-        frameLayout=findViewById(R.id.frameLayout);
-        gameOverLayout=findViewById(R.id.gameOverLayout);
+//        frameLayout=findViewById(R.id.frameLayout);
+//        gameOverLayout=findViewById(R.id.gameOverLayout);
         gestureDetector = new GestureDetectorCompat(this, this);
 
 
@@ -133,7 +133,7 @@ public class MainActivity extends AppCompatActivity implements GestureDetector.O
        if(num == 0){
            button.setText(" ");
        }else{
-           button.setText(num+"");
+           button.setText(String.valueOf(num));
        }
        switch (num){
            case 0:
@@ -141,39 +141,50 @@ public class MainActivity extends AppCompatActivity implements GestureDetector.O
                button.setBackgroundTintList(ContextCompat.getColorStateList(getApplicationContext(), R.color.score_best));
                button.setTextSize(25);
                break;
-           case 2: button.setBackgroundColor(Color.rgb(240,240,240));
-               button.setTextColor(Color.BLACK);
+           case 2:
+               button.setBackgroundTintList(ContextCompat.getColorStateList(getApplicationContext(), R.color.Color2));
+               button.setTextColor(getResources().getColor(R.color.black));
                break;
-           case 4: button.setBackgroundColor(Color.rgb(255,255,224));
-               button.setTextColor(Color.BLACK);
+           case 4:
+               button.setBackgroundTintList(ContextCompat.getColorStateList(getApplicationContext(), R.color.Color4));
+               button.setTextColor(getResources().getColor(R.color.black));
                break;
-           case 8: button.setBackgroundColor(Color.rgb(255,200,100));
-               button.setTextColor(Color.WHITE);
+           case 8:
+               button.setBackgroundTintList(ContextCompat.getColorStateList(getApplicationContext(), R.color.Color8));
+               button.setTextColor(getResources().getColor(R.color.White));
                break;
-           case 16: button.setBackgroundColor(Color.rgb(255,140,30));
-               button.setTextColor(Color.WHITE);
+           case 16:
+               button.setBackgroundTintList(ContextCompat.getColorStateList(getApplicationContext(), R.color.Color16));
+               button.setTextColor(getResources().getColor(R.color.White));
                break;
-           case 32: button.setBackgroundColor(Color.rgb(255,100,65));
-               button.setTextColor(Color.WHITE);
+           case 32:
+               button.setBackgroundTintList(ContextCompat.getColorStateList(getApplicationContext(), R.color.Color32));
+               button.setTextColor(getResources().getColor(R.color.White));
                break;
-           case 64: button.setBackgroundColor(Color.rgb(250,80,100));
-               button.setTextColor(Color.WHITE);
+           case 64:
+               button.setBackgroundTintList(ContextCompat.getColorStateList(getApplicationContext(), R.color.Color64));
+               button.setTextColor(getResources().getColor(R.color.White));
                break;
-           case 128: button.setBackgroundColor(Color.rgb(255,220,0));
-               button.setTextColor(Color.WHITE);
+           case 128:
+               button.setBackgroundTintList(ContextCompat.getColorStateList(getApplicationContext(), R.color.Color128));
+               button.setTextColor(getResources().getColor(R.color.White));
                break;
-           case 256: button.setBackgroundColor(Color.rgb(240,240,0));
-               button.setTextColor(Color.BLACK);
+           case 256:
+               button.setBackgroundTintList(ContextCompat.getColorStateList(getApplicationContext(), R.color.Color256));
+               button.setTextColor(getResources().getColor(R.color.black));
                break;
-           case 512: button.setBackgroundColor(Color.rgb(245,245,0));
-               button.setTextColor(Color.BLACK);
+           case 512:
+               button.setBackgroundTintList(ContextCompat.getColorStateList(getApplicationContext(), R.color.Color512));
+               button.setTextColor(getResources().getColor(R.color.black));
 
                break;
-           case 1024: button.setBackgroundColor(Color.rgb(250,250,0));
-               button.setTextColor(Color.BLACK);
+           case 1024:
+               button.setBackgroundTintList(ContextCompat.getColorStateList(getApplicationContext(), R.color.Color1024));
+               button.setTextColor(getResources().getColor(R.color.black));
                break;
-           default: button.setBackgroundColor(Color.rgb(255,255,0));
-               button.setTextColor(Color.BLACK);
+           default:
+               button.setBackgroundTintList(ContextCompat.getColorStateList(getApplicationContext(), R.color.Color2048));
+               button.setTextColor(getResources().getColor(R.color.black));
        }
     }
     public void addRandomNum(){
@@ -196,7 +207,7 @@ public class MainActivity extends AppCompatActivity implements GestureDetector.O
 
     @SuppressLint("SetTextI18n")
     public void restart(){
-        frameLayout.removeView(gameOverLayout);
+//        frameLayout.removeView(gameOverLayout);
         for(int row = 0; row<4; row++){
             for(int column = 0; column<4; column++){
                 int[] emptyPositions={row,column};
@@ -206,27 +217,30 @@ public class MainActivity extends AppCompatActivity implements GestureDetector.O
             }
         }
         scoreValue =0;
-        score.setText(""+scoreValue);
+        score.setText(String.valueOf(scoreValue));
         bestScoreValue = sharedPreferences.getLong(high_score,0);
-        bestScore.setText(""+bestScoreValue);
+        bestScore.setText(String.valueOf(bestScoreValue));
         addRandomNum();
         addRandomNum();
     }
-    void isGameOver(){
+    boolean isGameOver(){
         if(cellValuesOfBoard[0][0]==0)
         for(int i=0;i<4;i++) {
             for(int j=1;j<4;j++){
                 if(cellValuesOfBoard[i][j]==0 || cellValuesOfBoard[i][j]==cellValuesOfBoard[i][j-1])
-                    return;
+                    return false;
             }
         }
         for(int j=0;j<4;j++) {
             for(int i=1;i<4;i++){
                 if(cellValuesOfBoard[i][j]==0 || cellValuesOfBoard[i][j]==cellValuesOfBoard[i-1][j])
-                    return;
+                    return false;
             }
         }
-        frameLayout.addView(gameOverLayout);
+
+        //frameLayout.addView(gameOverLayout);
+        Toast.makeText(this,"GAME OVER",Toast.LENGTH_SHORT);
+        return true;
     }
 
     public int direction(float x1,float x2,float y1,float y2){
@@ -234,6 +248,23 @@ public class MainActivity extends AppCompatActivity implements GestureDetector.O
             return x1>x2 ? LEFT : RIGHT;
         }else{
             return y1>y2 ? DOWN : UP;
+        }
+    }
+    private void updateEmptyCells(){
+        for(int r =0 ; r<BOARD_SIZE;r++){
+            for(int c =0 ; c<BOARD_SIZE;c++){
+                if(cellValuesOfBoard[r][c] == 0 && !emptySpaces.contains(new int[]{r, c})){
+                    emptySpaces.clear();
+                    emptySpaces.add(new int[]{r,c});
+                }
+            }
+        }
+    }
+    private void updateCells(){
+        for(int r =0 ; r<BOARD_SIZE;r++){
+            for(int c =0 ; c<BOARD_SIZE;c++){
+                makeCellStyle(cellTextViewOfBoard[r][c],cellValuesOfBoard[r][c]);
+            }
         }
     }
     @Override
@@ -251,11 +282,13 @@ public class MainActivity extends AppCompatActivity implements GestureDetector.O
     }
 
     private void onSwipeRight() {
+        if(isGameOver())
+            return;
         boolean isMoved=false;
         for(int r = 0;r<BOARD_SIZE;r++){//row
             int index = BOARD_SIZE-1;
             for(int c = BOARD_SIZE-2;c>=0;c--){//column
-                if(cellValuesOfBoard[r][c] != 0){//check if below cell is not empty
+                if(cellValuesOfBoard[r][c] != 0){
                     if(cellValuesOfBoard[r][index]==0){
                         cellValuesOfBoard[r][index]=cellValuesOfBoard[r][c];
                         cellValuesOfBoard[r][c]=0;
@@ -263,12 +296,14 @@ public class MainActivity extends AppCompatActivity implements GestureDetector.O
                     }else if(cellValuesOfBoard[r][c]==cellValuesOfBoard[r][index]){
                         cellValuesOfBoard[r][index]*=2;
                         cellValuesOfBoard[r][c]=0;
+                        scoreValue+=cellValuesOfBoard[r][index];
+                        score.setText(String.valueOf(scoreValue));
                         isMoved=true;
                     }else{
-                        index++;
-                        cellValuesOfBoard[r][index]=cellValuesOfBoard[r][c];
-                        if (r != index) {
-                            cellValuesOfBoard[r][c]= 0;
+                        index--;
+                        if (c != index) {
+                            cellValuesOfBoard[r][index] = cellValuesOfBoard[r][c];
+                            cellValuesOfBoard[r][c] = 0;
                             isMoved = true;
                         }
                     }
@@ -276,12 +311,16 @@ public class MainActivity extends AppCompatActivity implements GestureDetector.O
             }
         }
         if(isMoved){
+            updateEmptyCells();
             addRandomNum();
+            updateCells();
             isGameOver();
         }
     }
 
     private void onSwipeLeft() {
+        if(isGameOver())
+            return;
         boolean isMoved=false;
         for(int r = 0;r<BOARD_SIZE;r++){//column
             int index = 0;
@@ -294,12 +333,14 @@ public class MainActivity extends AppCompatActivity implements GestureDetector.O
                     }else if(cellValuesOfBoard[r][c]==cellValuesOfBoard[r][index]){
                         cellValuesOfBoard[r][index]*=2;
                         cellValuesOfBoard[r][c]=0;
+                        scoreValue+=cellValuesOfBoard[r][index];
+                        score.setText(String.valueOf(scoreValue));
                         isMoved=true;
                     }else{
                         index++;
-                        cellValuesOfBoard[r][index]=cellValuesOfBoard[r][c];
                         if (r != index) {
-                            cellValuesOfBoard[r][c]= 0;
+                            cellValuesOfBoard[r][index] = cellValuesOfBoard[r][c];
+                            cellValuesOfBoard[r][c] = 0;
                             isMoved = true;
                         }
                     }
@@ -307,12 +348,16 @@ public class MainActivity extends AppCompatActivity implements GestureDetector.O
             }
         }
         if(isMoved){
+            updateEmptyCells();
             addRandomNum();
+            updateCells();
             isGameOver();
         }
     }
 
     private void onSwipeDown() {
+        if(isGameOver())
+            return;
         boolean isMoved=false;
         for(int c = 0;c<BOARD_SIZE;c++){//column
             int index = BOARD_SIZE-1;
@@ -325,12 +370,14 @@ public class MainActivity extends AppCompatActivity implements GestureDetector.O
                     }else if(cellValuesOfBoard[r][c]==cellValuesOfBoard[index][c]){
                         cellValuesOfBoard[index][c]*=2;
                         cellValuesOfBoard[r][c]=0;
+                        scoreValue+=cellValuesOfBoard[index][c];
+                        score.setText(String.valueOf(scoreValue));
                         isMoved=true;
                     }else{
-                        index++;
-                        cellValuesOfBoard[index][c]=cellValuesOfBoard[r][c];
+                        index--;
                         if (r != index) {
-                            cellValuesOfBoard[r][c]= 0;
+                            cellValuesOfBoard[index][c] = cellValuesOfBoard[r][c];
+                            cellValuesOfBoard[r][c] = 0;
                             isMoved = true;
                         }
                     }
@@ -338,12 +385,16 @@ public class MainActivity extends AppCompatActivity implements GestureDetector.O
             }
         }
         if(isMoved){
+            updateEmptyCells();
             addRandomNum();
+            updateCells();
             isGameOver();
         }
     }
 
     private void onSwipeUp() {
+        if(isGameOver())
+            return;
         boolean isMoved=false;
         for(int c = 0;c<BOARD_SIZE;c++){//column
             int index = 0;
@@ -356,12 +407,14 @@ public class MainActivity extends AppCompatActivity implements GestureDetector.O
                     }else if(cellValuesOfBoard[r][c]==cellValuesOfBoard[index][c]){
                         cellValuesOfBoard[index][c]*=2;
                         cellValuesOfBoard[r][c]=0;
+                        scoreValue+=cellValuesOfBoard[index][c];
+                        score.setText(String.valueOf(scoreValue));
                         isMoved=true;
                     }else{
                         index++;
-                        cellValuesOfBoard[index][c]=cellValuesOfBoard[r][c];
                         if (r != index) {
-                            cellValuesOfBoard[r][c]= 0;
+                            cellValuesOfBoard[index][c] = cellValuesOfBoard[r][c];
+                            cellValuesOfBoard[r][c] = 0;
                             isMoved = true;
                         }
                     }
@@ -369,7 +422,9 @@ public class MainActivity extends AppCompatActivity implements GestureDetector.O
             }
         }
         if(isMoved){
+            updateEmptyCells();
             addRandomNum();
+            updateCells();
             isGameOver();
         }
     }

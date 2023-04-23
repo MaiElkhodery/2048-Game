@@ -117,9 +117,9 @@
         android:layout_height="0dp"
         android:layout_margin="10dp"
         android:layout_marginTop="20dp"
-        android:background="@drawable/background_gridlayout"
         android:padding="10dp"
         app:columnCount="4"
+        android:background="@drawable/background_gridlayout"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -130,110 +130,94 @@
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/cell1"
             style="@style/cellsStyle"
-            android:backgroundTint="@color/score_best"
             android:gravity="center" />
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/cell2"
             style="@style/cellsStyle"
-            android:backgroundTint="@color/score_best"
             android:gravity="center" />
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/cell3"
             style="@style/cellsStyle"
-            android:backgroundTint="@color/score_best"
             android:gravity="center" />
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/cell4"
             style="@style/cellsStyle"
-            android:backgroundTint="@color/score_best"
             android:gravity="center" />
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/cell5"
             style="@style/cellsStyle"
-            android:backgroundTint="@color/score_best"
             android:gravity="center" />
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/cell6"
             style="@style/cellsStyle"
-            android:backgroundTint="@color/score_best"
             android:gravity="center" />
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/cell7"
             style="@style/cellsStyle"
-            android:backgroundTint="@color/score_best"
             android:gravity="center" />
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/cell8"
             style="@style/cellsStyle"
-            android:backgroundTint="@color/score_best"
             android:gravity="center" />
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/cell9"
             style="@style/cellsStyle"
-            android:backgroundTint="@color/score_best"
             android:gravity="center" />
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/cell10"
             style="@style/cellsStyle"
-            android:backgroundTint="@color/score_best"
             android:gravity="center" />
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/cell11"
             style="@style/cellsStyle"
-            android:backgroundTint="@color/score_best"
             android:gravity="center" />
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/cell12"
             style="@style/cellsStyle"
-            android:backgroundTint="@color/score_best"
             android:gravity="center" />
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/cell13"
             style="@style/cellsStyle"
-            android:backgroundTint="@color/score_best"
             android:gravity="center" />
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/cell14"
             style="@style/cellsStyle"
-            android:backgroundTint="@color/score_best"
             android:gravity="center" />
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/cell15"
             style="@style/cellsStyle"
-            android:backgroundTint="@color/score_best"
             android:gravity="center" />
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/cell16"
             style="@style/cellsStyle"
-            android:backgroundTint="@color/score_best"
             android:gravity="center" />
 
     </androidx.gridlayout.widget.GridLayout>
 
-    <FrameLayout
-        android:id="@+id/frameLayout"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_margin="10dp"
-        android:layout_marginTop="20dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/gameExplainTextView2"/>
+<!--    <FrameLayout-->
+<!--        android:id="@+id/frameLayout"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="0dp"-->
+<!--        android:layout_margin="10dp"-->
+<!--        android:layout_marginTop="20dp"-->
+<!--        app:layout_constraintBottom_toBottomOf="parent"-->
+<!--        app:layout_constraintEnd_toEndOf="parent"-->
+<!--        app:layout_constraintStart_toStartOf="parent"-->
+<!--        app:layout_constraintTop_toBottomOf="@+id/gameExplainTextView2"/>-->
 
 </androidx.constraintlayout.widget.ConstraintLayout>
