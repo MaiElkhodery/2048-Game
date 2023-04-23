@@ -83,7 +83,7 @@ public class MainActivity extends AppCompatActivity implements GestureDetector.O
         bestScoreValue=0;
         sharedPreferences = getSharedPreferences(FILE_NAME,MODE_PRIVATE);
         bestScoreValue = sharedPreferences.getLong(high_score,0);
-        bestScore.setText(bestScoreValue+"");
+        bestScore.setText(String.valueOf(bestScoreValue));
 
         restartButton.setOnClickListener(view -> restart());
 
@@ -208,6 +208,9 @@ public class MainActivity extends AppCompatActivity implements GestureDetector.O
     @SuppressLint("SetTextI18n")
     public void restart(){
 //        frameLayout.removeView(gameOverLayout);
+        if(scoreValue> sharedPreferences.getLong(high_score,0)){
+            sharedPreferences.edit().putLong(high_score,scoreValue).apply();
+        }
         for(int row = 0; row<4; row++){
             for(int column = 0; column<4; column++){
                 int[] emptyPositions={row,column};
@@ -239,7 +242,10 @@ public class MainActivity extends AppCompatActivity implements GestureDetector.O
         }
 
         //frameLayout.addView(gameOverLayout);
-        Toast.makeText(this,"GAME OVER",Toast.LENGTH_SHORT);
+        if(scoreValue> sharedPreferences.getLong(high_score,0)){
+            sharedPreferences.edit().putLong(high_score,scoreValue).apply();
+        }
+        Toast.makeText(this,"GAME OVER",Toast.LENGTH_SHORT).show();
         return true;
     }
 
@@ -286,32 +292,28 @@ public class MainActivity extends AppCompatActivity implements GestureDetector.O
             return;
         boolean isMoved=false;
         for(int r = 0;r<BOARD_SIZE;r++){//row
-            int index = BOARD_SIZE-1;
             for(int c = BOARD_SIZE-2;c>=0;c--){//column
                 if(cellValuesOfBoard[r][c] != 0){
-                    if(cellValuesOfBoard[r][index]==0){
-                        cellValuesOfBoard[r][index]=cellValuesOfBoard[r][c];
+                    int preCell=c+1;
+                    while(preCell<=3 && cellValuesOfBoard[r][preCell]==0)
+                        preCell++;
+                    if( preCell==4 || (cellValuesOfBoard[r][preCell]!=cellValuesOfBoard[r][c] && (preCell-1)!=c) ) {
+                        isMoved = true;
+                        cellValuesOfBoard[r][preCell-1] = cellValuesOfBoard[r][c];
+                        emptySpaces.remove(new int[]{r,preCell-1} );
                         cellValuesOfBoard[r][c]=0;
-                        isMoved=true;
-                    }else if(cellValuesOfBoard[r][c]==cellValuesOfBoard[r][index]){
-                        cellValuesOfBoard[r][index]*=2;
-                        cellValuesOfBoard[r][c]=0;
-                        scoreValue+=cellValuesOfBoard[r][index];
+                    } else if(cellValuesOfBoard[r][preCell]==cellValuesOfBoard[r][c]){
+                        isMoved = true;
+                        cellValuesOfBoard[r][preCell] += cellValuesOfBoard[r][c];
+                        scoreValue+=2*cellValuesOfBoard[r][c];
                         score.setText(String.valueOf(scoreValue));
-                        isMoved=true;
-                    }else{
-                        index--;
-                        if (c != index) {
-                            cellValuesOfBoard[r][index] = cellValuesOfBoard[r][c];
-                            cellValuesOfBoard[r][c] = 0;
-                            isMoved = true;
-                        }
+                        cellValuesOfBoard[r][c]=0;
                     }
                 }
+                updateEmptyCells();
             }
         }
         if(isMoved){
-            updateEmptyCells();
             addRandomNum();
             updateCells();
             isGameOver();
@@ -323,32 +325,29 @@ public class MainActivity extends AppCompatActivity implements GestureDetector.O
             return;
         boolean isMoved=false;
         for(int r = 0;r<BOARD_SIZE;r++){//column
-            int index = 0;
             for(int c = 1;c<BOARD_SIZE;c++){//row
                 if(cellValuesOfBoard[r][c] != 0){//check if below cell is not empty
-                    if(cellValuesOfBoard[r][index]==0){
-                        cellValuesOfBoard[r][index]=cellValuesOfBoard[r][c];
+                    int preCell=c-1;
+                    while(preCell>=0 && cellValuesOfBoard[r][preCell]==0)
+                        preCell--;
+                    if( preCell==-1 || (cellValuesOfBoard[r][preCell]!=cellValuesOfBoard[r][c] && (preCell+1)!=c) ) {
+                        isMoved = true;
+                        cellValuesOfBoard[r][preCell+1] = cellValuesOfBoard[r][c];
+                        emptySpaces.remove(new int[]{r,preCell+1} );
                         cellValuesOfBoard[r][c]=0;
-                        isMoved=true;
-                    }else if(cellValuesOfBoard[r][c]==cellValuesOfBoard[r][index]){
-                        cellValuesOfBoard[r][index]*=2;
-                        cellValuesOfBoard[r][c]=0;
-                        scoreValue+=cellValuesOfBoard[r][index];
+                    } else if(cellValuesOfBoard[r][preCell]==cellValuesOfBoard[r][c]){
+                        isMoved = true;
+                        cellValuesOfBoard[r][preCell] += cellValuesOfBoard[r][c];
+                        scoreValue+=2*cellValuesOfBoard[r][c];
                         score.setText(String.valueOf(scoreValue));
-                        isMoved=true;
-                    }else{
-                        index++;
-                        if (r != index) {
-                            cellValuesOfBoard[r][index] = cellValuesOfBoard[r][c];
-                            cellValuesOfBoard[r][c] = 0;
-                            isMoved = true;
-                        }
+                        cellValuesOfBoard[r][c]=0;
                     }
+                    }
+
                 }
-            }
+            updateEmptyCells();
         }
         if(isMoved){
-            updateEmptyCells();
             addRandomNum();
             updateCells();
             isGameOver();
@@ -360,32 +359,28 @@ public class MainActivity extends AppCompatActivity implements GestureDetector.O
             return;
         boolean isMoved=false;
         for(int c = 0;c<BOARD_SIZE;c++){//column
-            int index = BOARD_SIZE-1;
             for(int r = BOARD_SIZE-2;r>=0;r--){//row
                 if(cellValuesOfBoard[r][c] != 0){//check if below cell is not empty
-                    if(cellValuesOfBoard[index][c]==0){
-                        cellValuesOfBoard[index][c]=cellValuesOfBoard[r][c];
-                        cellValuesOfBoard[r][c]=0;
+                    int preCell=r+1;
+                    while(preCell<=3 && cellValuesOfBoard[preCell][c]==0)
+                        preCell++;
+                    if( preCell==4 || (cellValuesOfBoard[preCell][c]!=cellValuesOfBoard[r][c] && (preCell-1)!=r) ) {
+                        cellValuesOfBoard[preCell - 1][c] = cellValuesOfBoard[r][c];
                         isMoved=true;
-                    }else if(cellValuesOfBoard[r][c]==cellValuesOfBoard[index][c]){
-                        cellValuesOfBoard[index][c]*=2;
+                        emptySpaces.remove(new int[]{preCell-1,c} );
                         cellValuesOfBoard[r][c]=0;
-                        scoreValue+=cellValuesOfBoard[index][c];
+                    } else if(cellValuesOfBoard[preCell][c]==cellValuesOfBoard[r][c]){
+                        cellValuesOfBoard[preCell][c] += cellValuesOfBoard[r][c];
+                        isMoved=true;
+                        scoreValue+=2*cellValuesOfBoard[r][c];
                         score.setText(String.valueOf(scoreValue));
-                        isMoved=true;
-                    }else{
-                        index--;
-                        if (r != index) {
-                            cellValuesOfBoard[index][c] = cellValuesOfBoard[r][c];
-                            cellValuesOfBoard[r][c] = 0;
-                            isMoved = true;
-                        }
+                        cellValuesOfBoard[r][c]=0;
                     }
+                    updateEmptyCells();
                 }
             }
         }
         if(isMoved){
-            updateEmptyCells();
             addRandomNum();
             updateCells();
             isGameOver();
@@ -397,32 +392,28 @@ public class MainActivity extends AppCompatActivity implements GestureDetector.O
             return;
         boolean isMoved=false;
         for(int c = 0;c<BOARD_SIZE;c++){//column
-            int index = 0;
             for(int r = 1;r<BOARD_SIZE;r++){//row
                 if(cellValuesOfBoard[r][c] != 0){//check if below cell is not empty
-                    if(cellValuesOfBoard[index][c]==0){
-                        cellValuesOfBoard[index][c]=cellValuesOfBoard[r][c];
-                        cellValuesOfBoard[r][c]=0;
+                    int preCell=r-1;
+                    while(preCell>=0 && cellValuesOfBoard[preCell][c]==0)
+                        preCell--;
+                    if( preCell==-1 || (cellValuesOfBoard[preCell][c]!=cellValuesOfBoard[r][c] && (preCell+1)!=r) ) {
+                        cellValuesOfBoard[preCell + 1][c] = cellValuesOfBoard[r][c];
                         isMoved=true;
-                    }else if(cellValuesOfBoard[r][c]==cellValuesOfBoard[index][c]){
-                        cellValuesOfBoard[index][c]*=2;
+                        emptySpaces.remove(new int[]{preCell+1,c} );
                         cellValuesOfBoard[r][c]=0;
-                        scoreValue+=cellValuesOfBoard[index][c];
+                    } else if(cellValuesOfBoard[preCell][c]==cellValuesOfBoard[r][c]){
+                        cellValuesOfBoard[preCell][c] += cellValuesOfBoard[r][c];
+                        isMoved=true;
+                        scoreValue+=2*cellValuesOfBoard[r][c];
                         score.setText(String.valueOf(scoreValue));
-                        isMoved=true;
-                    }else{
-                        index++;
-                        if (r != index) {
-                            cellValuesOfBoard[index][c] = cellValuesOfBoard[r][c];
-                            cellValuesOfBoard[r][c] = 0;
-                            isMoved = true;
-                        }
+                        cellValuesOfBoard[r][c]=0;
                     }
+                    updateEmptyCells();
                 }
             }
         }
         if(isMoved){
-            updateEmptyCells();
             addRandomNum();
             updateCells();
             isGameOver();
@@ -455,5 +446,12 @@ public class MainActivity extends AppCompatActivity implements GestureDetector.O
     public void onLongPress(@NonNull MotionEvent motionEvent) {
 
     }
-    
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if(scoreValue> sharedPreferences.getLong(high_score,0)){
+            sharedPreferences.edit().putLong(high_score,scoreValue).apply();
+        }
+    }
 }
