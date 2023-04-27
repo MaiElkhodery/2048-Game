@@ -101,23 +101,28 @@ public class MainActivity extends AppCompatActivity implements GestureDetector.O
     }
     @Override
     public boolean onKey(View view, int keyCode, KeyEvent event) {
+        boolean changed = false;
         if (event.getAction() == KeyEvent.ACTION_DOWN) {
             switch (keyCode) {
                 case KeyEvent.KEYCODE_DPAD_UP:
-                    // Handle moving up
-                    onSwipeUp();
+                    changed=moveUp();
+                    if (changed)
+                        update();
                     return true;
                 case KeyEvent.KEYCODE_DPAD_DOWN:
-                    // Handle moving down
-                    onSwipeDown();
+                    changed = moveDown();
+                    if (changed)
+                        update();
                     return true;
                 case KeyEvent.KEYCODE_DPAD_LEFT:
-                    // Handle moving left
-                    onSwipeLeft();
+                    changed=moveLeft();
+                    if (changed)
+                        update();
                     return true;
                 case KeyEvent.KEYCODE_DPAD_RIGHT:
-
-                    onSwipeRight();
+                    changed=moveRight();
+                    if (changed)
+                        update();
                     return true;
             }
         }
@@ -172,7 +177,7 @@ public class MainActivity extends AppCompatActivity implements GestureDetector.O
                break;
            case 256:
                button.setBackgroundTintList(ContextCompat.getColorStateList(getApplicationContext(), R.color.Color256));
-               button.setTextColor(getResources().getColor(R.color.black));
+               button.setTextColor(getResources().getColor(R.color.White));
                break;
            case 512:
                button.setBackgroundTintList(ContextCompat.getColorStateList(getApplicationContext(), R.color.Color512));
@@ -227,18 +232,38 @@ public class MainActivity extends AppCompatActivity implements GestureDetector.O
         addRandomNum();
         addRandomNum();
     }
-    boolean isGameOver(){
-        if(cellValuesOfBoard[0][0]==0)
-        for(int i=0;i<4;i++) {
-            for(int j=1;j<4;j++){
-                if(cellValuesOfBoard[i][j]==0 || cellValuesOfBoard[i][j]==cellValuesOfBoard[i][j-1])
-                    return false;
+    void isGameOver(){
+
+        // Check if any tile has a value of 2048.
+        for (int i = 0; i < BOARD_SIZE; i++) {
+            for (int j = 0; j < BOARD_SIZE; j++) {
+                if (cellValuesOfBoard[i][j] == 2048) {
+                    Toast.makeText(this,"YOU WIN!",Toast.LENGTH_SHORT).show();
+                }
             }
         }
-        for(int j=0;j<4;j++) {
-            for(int i=1;i<4;i++){
-                if(cellValuesOfBoard[i][j]==0 || cellValuesOfBoard[i][j]==cellValuesOfBoard[i-1][j])
-                    return false;
+        // Check if there are any empty tiles on the board.
+        for (int i = 0; i < BOARD_SIZE; i++) {
+            for (int j = 0; j < BOARD_SIZE; j++) {
+                if (cellValuesOfBoard[i][j] == 0) {
+                    return ;
+                }
+            }
+        }
+        // Check if there are any adjacent tiles with the same value.
+        for (int i = 0; i < BOARD_SIZE; i++) {
+            for (int j = 0; j < BOARD_SIZE; j++) {
+                int currentValue = cellValuesOfBoard[i][j];
+
+                // Check the tile to the right.
+                if (j < BOARD_SIZE - 1 && cellValuesOfBoard[i][j + 1] == currentValue) {
+                    return ;
+                }
+
+                // Check the tile below.
+                if (i < BOARD_SIZE - 1 && cellValuesOfBoard[i + 1][j] == currentValue) {
+                    return ;
+                }
             }
         }
 
@@ -247,7 +272,6 @@ public class MainActivity extends AppCompatActivity implements GestureDetector.O
             sharedPreferences.edit().putLong(high_score,scoreValue).apply();
         }
         Toast.makeText(this,"GAME OVER",Toast.LENGTH_SHORT).show();
-        return true;
     }
 
     public int direction(float x1,float x2,float y1,float y2){
@@ -258,10 +282,10 @@ public class MainActivity extends AppCompatActivity implements GestureDetector.O
         }
     }
     private void updateEmptyCells(){
+        emptySpaces.clear();
         for(int r =0 ; r<BOARD_SIZE;r++){
             for(int c =0 ; c<BOARD_SIZE;c++){
-                if(cellValuesOfBoard[r][c] == 0 && !emptySpaces.contains(new int[]{r, c})){
-                    emptySpaces.clear();
+                if(cellValuesOfBoard[r][c] == 0){
                     emptySpaces.add(new int[]{r,c});
                 }
             }
@@ -274,24 +298,28 @@ public class MainActivity extends AppCompatActivity implements GestureDetector.O
             }
         }
     }
+    public void update(){
+        updateEmptyCells();
+        addRandomNum();
+        updateCells();
+        isGameOver();
+    }
     @Override
     public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
         int dir = direction(e1.getX(),e1.getY(),e2.getX(),e2.getY());
         if(dir == UP)
-            onSwipeUp();
+            moveUp();
         else if(dir == DOWN)
-            onSwipeDown();
+            moveDown();
         else if(dir == LEFT)
-            onSwipeLeft();
+            moveLeft();
         else
-            onSwipeRight();
+            moveRight();
         return true;
     }
 
     private void onSwipeRight() {
         Log.d("MOVE RIGHT","RIGHT");
-        if(isGameOver())
-            return;
         boolean isMoved=false;
         for (int row = 0; row < 4; row++) {
             for (int col = 2; col >= 0; col--) {
@@ -299,12 +327,11 @@ public class MainActivity extends AppCompatActivity implements GestureDetector.O
                 if (currCell == 0) {
                     continue;
                 }
-                int prevCell = cellValuesOfBoard[row][col+1];
                 int pointer=col+1;
-                while(prevCell == 0 && pointer!=3){
+                while(cellValuesOfBoard[row][pointer] == 0 && pointer<3){
                     pointer++;
-                    prevCell=cellValuesOfBoard[row][pointer];
                 }
+                int prevCell=cellValuesOfBoard[row][pointer];
                 Log.d("RIGHT PRE_CELL",String.valueOf("Value = "+prevCell+", Position "+row+" - "+pointer));
                 if(prevCell == 0) {
                     prevCell=currCell;
@@ -320,6 +347,13 @@ public class MainActivity extends AppCompatActivity implements GestureDetector.O
                     scoreValue+=prevCell;
                     score.setText(String.valueOf(scoreValue));
                     isMoved=true;
+                }else {
+                    pointer--;
+                    if (col != pointer) {
+                        cellValuesOfBoard[row][pointer] = cellValuesOfBoard[row][col];
+                        cellValuesOfBoard[row][col] = 0;
+                        isMoved = true;
+                    }
                 }
             }
         }
@@ -332,8 +366,6 @@ public class MainActivity extends AppCompatActivity implements GestureDetector.O
     }
 
     private void onSwipeLeft() {
-        if(isGameOver())
-            return;
         boolean isMoved=false;
         for (int row = 0; row < 4; row++) {
             for (int col = 1; col < 4; col++) {
@@ -341,29 +373,35 @@ public class MainActivity extends AppCompatActivity implements GestureDetector.O
                 if (currCell == 0) {
                     continue;
                 }
-                int prevCell = cellValuesOfBoard[row][col-1];
-                int pointer=col-1;
-                while(prevCell == 0 && pointer!=0){
+                int pointer = col - 1;
+                while (pointer > 0 && cellValuesOfBoard[row][pointer] == 0) {
                     pointer--;
-                    prevCell=cellValuesOfBoard[row][pointer];
                 }
-                Log.d("RIGHT PRE_CELL",String.valueOf("Value = "+prevCell+", Position "+row+" - "+pointer));
-                if(prevCell == 0) {
+                int prevCell = cellValuesOfBoard[row][pointer];
+                if (prevCell == currCell) {
+                    prevCell *= 2;
+                    currCell = 0;
+                    cellValuesOfBoard[row][col] = currCell;
+                    cellValuesOfBoard[row][pointer] = prevCell;
+                    scoreValue += prevCell;
+                    score.setText(String.valueOf(scoreValue));
+                    isMoved = true;
+                } else if (prevCell == 0) {
                     prevCell=currCell;
                     currCell=0;
                     cellValuesOfBoard[row][col]=currCell;
                     cellValuesOfBoard[row][pointer]=prevCell;
                     isMoved=true;
-                }else if (prevCell == currCell) {
-                    prevCell*=2;
-                    currCell=0;
-                    cellValuesOfBoard[row][col]=currCell;
-                    cellValuesOfBoard[row][pointer]=prevCell;
-                    scoreValue+=prevCell;
-                    score.setText(String.valueOf(scoreValue));
-                    isMoved=true;
+                }else {
+                    pointer++;
+                    if (col != pointer) {
+                        cellValuesOfBoard[row][pointer] = cellValuesOfBoard[row][col];
+                        cellValuesOfBoard[row][col] = 0;
+                        isMoved = true;
+                    }
                 }
             }
+
         }
         if(isMoved){
             updateEmptyCells();
@@ -375,8 +413,6 @@ public class MainActivity extends AppCompatActivity implements GestureDetector.O
 
     private void onSwipeDown() {
         Log.d("MOVE DOWN","DOWN");
-        if(isGameOver())
-            return;
         boolean isMoved=false;
         for (int col = 0; col < 4; col++) {
             for (int row = 2; row >= 0; row--) {
@@ -384,12 +420,11 @@ public class MainActivity extends AppCompatActivity implements GestureDetector.O
                 if (currCell == 0) {
                     continue;
                 }
-                int prevCell = cellValuesOfBoard[row+1][col];
                 int pointer=row+1;
-                while(prevCell == 0 && pointer!=3){
+                while(cellValuesOfBoard[pointer][col] ==0 && pointer<3){
                     pointer++;
-                    prevCell=cellValuesOfBoard[pointer][col];
                 }
+                int prevCell=cellValuesOfBoard[pointer][col];
                 Log.d("DOWN PRE_CELL",String.valueOf("Value = "+prevCell+", Position "+pointer+" - "+col));
                 if(prevCell == 0) {
                     prevCell=currCell;
@@ -405,6 +440,13 @@ public class MainActivity extends AppCompatActivity implements GestureDetector.O
                     scoreValue+=prevCell;
                     score.setText(String.valueOf(scoreValue));
                     isMoved=true;
+                }else{
+                    pointer--;
+                    if (row != pointer) {
+                        cellValuesOfBoard[pointer][col] = cellValuesOfBoard[row][col];
+                        cellValuesOfBoard[row][col] = 0;
+                        isMoved = true;
+                    }
                 }
             }
         }
@@ -418,8 +460,6 @@ public class MainActivity extends AppCompatActivity implements GestureDetector.O
 
     private void onSwipeUp() {
         Log.d("MOVE UP","UP");
-        if(isGameOver())
-            return;
         boolean isMoved=false;
         for (int col = 0; col < 4; col++) {
             for (int row = 1; row < 4; row++) {
@@ -427,12 +467,11 @@ public class MainActivity extends AppCompatActivity implements GestureDetector.O
                 if (currCell == 0) {
                     continue;
                 }
-                int prevCell = cellValuesOfBoard[row-1][col];
                 int pointer=row-1;
-                while(prevCell == 0 && pointer!=0){
+                while(cellValuesOfBoard[pointer][col] == 0 && pointer>0){
                     pointer--;
-                    prevCell=cellValuesOfBoard[pointer][col];
                 }
+                int prevCell=cellValuesOfBoard[pointer][col];
                 Log.d("UP PRE_CELL",String.valueOf("Value = "+prevCell+", Position "+pointer+" - "+col));
                 if(prevCell == 0) {
                     prevCell=currCell;
@@ -448,6 +487,13 @@ public class MainActivity extends AppCompatActivity implements GestureDetector.O
                     scoreValue+=prevCell;
                     score.setText(String.valueOf(scoreValue));
                     isMoved=true;
+                }else{
+                    pointer++;
+                    if (row != pointer) {
+                        cellValuesOfBoard[pointer][col] = cellValuesOfBoard[row][col];
+                        cellValuesOfBoard[row][col] = 0;
+                        isMoved = true;
+                    }
                 }
             }
         }
@@ -459,7 +505,84 @@ public class MainActivity extends AppCompatActivity implements GestureDetector.O
         }
     }
 
+    public boolean moveUp(){
+        transpose();
+        boolean changed = moveLeft();
+        transpose();
+        return changed;
+    }
+    public boolean moveDown(){
+        transpose();
+        boolean changed = moveRight();
+        transpose();
+        return changed;
+    }
+    public boolean moveRight(){
+       reverse();
+       boolean changed = moveLeft();
+       reverse();
+       return changed;
+    }
+    public boolean moveLeft(){
+       boolean firstChange = compress();
+       boolean secChange = merge();
+       boolean thirdChange = compress();
+       return firstChange || secChange || thirdChange;
+    }
 
+
+    private void reverse() {
+        int[][] newBoardValues = new int[4][4];
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                newBoardValues[i][j] = cellValuesOfBoard[i][3 - j];
+            }
+        }
+        cellValuesOfBoard=newBoardValues;
+    }
+    private void transpose() {
+        int[][] newBoardValues = new int[4][4];
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                newBoardValues[i][j] = cellValuesOfBoard[j][i];
+            }
+        }
+        cellValuesOfBoard=newBoardValues;
+    }
+
+    public boolean  merge() {
+        boolean changed = false;
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 3; j++) {
+                if (cellValuesOfBoard[i][j] == cellValuesOfBoard[i][j + 1] && cellValuesOfBoard[i][j] != 0) {
+                    cellValuesOfBoard[i][j] = cellValuesOfBoard[i][j] * 2;
+                    scoreValue+=cellValuesOfBoard[i][j];
+                    score.setText(String.valueOf(scoreValue));
+                    cellValuesOfBoard[i][j + 1] = 0;
+                    changed = true;
+                }
+            }
+        }
+        return changed;
+    }
+    public boolean compress() {
+        boolean changed = false;
+        int[][] newBoardValues = new int[4][4];
+        for (int i = 0; i < 4; i++) {
+            int pos = 0;
+            for (int j = 0; j < 4; j++) {
+                if (cellValuesOfBoard[i][j] != 0) {
+                    newBoardValues[i][pos] = cellValuesOfBoard[i][j];
+                    if (j != pos) {
+                        changed = true;
+                    }
+                    pos++;
+                }
+            }
+        }
+        cellValuesOfBoard=newBoardValues;
+        return changed;
+    }
 
     @Override
     public boolean onDown(@NonNull MotionEvent motionEvent) {
