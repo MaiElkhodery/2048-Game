@@ -6,4 +6,5 @@
     <string name="best">Best Score</string>
     <string name="playGame">Play 2048 Game</string>
     <string name="gameExplain">Join the numbers and get to the 2048 tile!</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
