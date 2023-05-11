@@ -4,7 +4,9 @@ import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
+import android.util.Pair;
 import android.view.GestureDetector;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -21,28 +23,27 @@ import androidx.core.content.ContextCompat;
 import androidx.core.view.GestureDetectorCompat;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class MainActivity extends AppCompatActivity implements ResultFragment.SetonClickAgain,GestureDetector.OnGestureListener,View.OnKeyListener{
 
     TextView score ;
     TextView bestScore;
+    ResultFragment resultFragment;
+    AppCompatButton[][] cellTextViewOfBoard;
+    FrameLayout frameLayout;
     int scoreValue ;
     long bestScoreValue;
+    private final int BOARD_SIZE=4;
     ArrayList<int[]> emptySpaces;
     int[][] cellValuesOfBoard;
-    AppCompatButton[][] cellTextViewOfBoard;
     SharedPreferences sharedPreferences;
     String FILE_NAME = "highScoreFile";
     String high_score = "highScore";
     private GestureDetectorCompat gestureDetector;
-    FrameLayout frameLayout;
-    private final int UP = 1;
-    private final int DOWN = 2;
-    private final int RIGHT = 3;
-    private final int LEFT = 4;
-    private final int BOARD_SIZE=4;
-    ResultFragment resultFragment;
+    private Handler handler = new Handler();
+
     @SuppressLint("SetTextI18n")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,7 +52,8 @@ public class MainActivity extends AppCompatActivity implements ResultFragment.Se
 
         score = findViewById(R.id.scoreValue_textView);
         bestScore = findViewById(R.id.bestScoreValue_textview);
-        AppCompatImageButton restartButton = findViewById(R.id.newGameButton);
+        AppCompatImageButton restartButton = findViewById(R.id.newGameButton2);
+        AppCompatImageButton algoButton = findViewById(R.id.algoButton);
         scoreValue = 0;
         score.setText(scoreValue+"");
 
@@ -86,6 +88,7 @@ public class MainActivity extends AppCompatActivity implements ResultFragment.Se
         bestScore.setText(String.valueOf(bestScoreValue));
 
         restartButton.setOnClickListener(view -> restart());
+        algoButton.setOnClickListener(view -> playWithMinMax());
 
         frameLayout=findViewById(R.id.frameLayout);
         gestureDetector = new GestureDetectorCompat(this, this);
@@ -95,34 +98,78 @@ public class MainActivity extends AppCompatActivity implements ResultFragment.Se
         main_Layout.requestFocus();
         restart();
     }
+    public void restart(){
+        if(scoreValue> sharedPreferences.getLong(high_score,0)){
+            sharedPreferences.edit().putLong(high_score,scoreValue).apply();
+        }
+        for(int row = 0; row<4; row++){
+            for(int column = 0; column<4; column++){
+                int[] emptyPositions={row,column};
+                emptySpaces.add(emptyPositions);
+                cellValuesOfBoard[row][column]=0;
+                makeCellStyle(cellTextViewOfBoard[row][column],cellValuesOfBoard[row][column]);
+            }
+        }
+        scoreValue =0;
+        score.setText(String.valueOf(scoreValue));
+        bestScoreValue = sharedPreferences.getLong(high_score,0);
+        bestScore.setText(String.valueOf(bestScoreValue));
+        addRandomNum();
+        addRandomNum();
+    }
+    public void playWithMinMax(){
+        restart();
+        Pair<Directions, int[][]> bestMove;
+        MiniMax miniMaxAlgo = new MiniMax();
+        int i=0;
+        while(!isGameOver()){
+            Log.d("MINMAXLOOP",++i +"");
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    // Do nothing, just add a delay
+                }
+            }, 1000);
+            bestMove = miniMaxAlgo.getBestMove(cellValuesOfBoard);
+            Log.d("BestMove",bestMove.first.toString());
+            update(bestMove.second);
+        }
+    }
+    public void updateMiniMax(int[][] boardAfterMove){
+        cellValuesOfBoard=boardAfterMove;
+        updateEmptyCells();
+        addRandomNum();
+        updateCells();
+        isGameOver();
+    }
     @Override
     public boolean onKey(View view, int keyCode, KeyEvent event) {
-        boolean changed;
+        Pair<Boolean,int[][]> afterMove;
         if (event.getAction() == KeyEvent.ACTION_DOWN) {
             switch (keyCode) {
                 case KeyEvent.KEYCODE_DPAD_UP:
-                    Log.d("Move", "UP");
-                    changed=moveUp();
-                    if (changed)
-                        update();
+                    Log.d("Move","UP");
+                    afterMove=Move.moveUp(cellValuesOfBoard);
+                    if (afterMove.first)
+                        update(afterMove.second);
                     return true;
                 case KeyEvent.KEYCODE_DPAD_DOWN:
-                    Log.d("Move", "UP");
-                    changed = moveDown();
-                    if (changed)
-                        update();
+                    Log.d("Move","DOWN");
+                    afterMove=Move.moveDown(cellValuesOfBoard);
+                    if (afterMove.first)
+                        update(afterMove.second);
                     return true;
                 case KeyEvent.KEYCODE_DPAD_LEFT:
-                    Log.d("Move", "UP");
-                    changed=moveLeft();
-                    if (changed)
-                        update();
+                    Log.d("Move","LEFT");
+                    afterMove=Move.moveLeft(cellValuesOfBoard);
+                    if (afterMove.first)
+                        update(afterMove.second);
                     return true;
                 case KeyEvent.KEYCODE_DPAD_RIGHT:
-                    Log.d("Move", "UP");
-                    changed=moveRight();
-                    if (changed)
-                        update();
+                    Log.d("Move","RIGHT");
+                    afterMove=Move.moveRight(cellValuesOfBoard);
+                    if (afterMove.first)
+                        update(afterMove.second);
                     return true;
             }
         }
@@ -136,36 +183,39 @@ public class MainActivity extends AppCompatActivity implements ResultFragment.Se
     }
     @Override
     public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-        int dir = direction(e1.getX(),e1.getY(),e2.getX(),e2.getY());
-        boolean changed;
-        if(dir == UP) {
-            Log.d("Move", "UP");
-            changed = moveUp();
-            if (changed)
-                update();
+        Directions dir = direction(e1.getX(),e1.getY(),e2.getX(),e2.getY());
+        Pair<Boolean,int[][]> afterMove;
+        if(dir == Directions.UP) {
+            afterMove=Move.moveUp(cellValuesOfBoard);
+            if (afterMove.first)
+                update(afterMove.second);
         }
-        else if(dir == DOWN){
-            Log.d("Move", "DOWN");
-            changed=moveDown();
-            if (changed)
-                update();
+        else if(dir == Directions.DOWN){
+            afterMove=Move.moveDown(cellValuesOfBoard);
+            if (afterMove.first)
+                update(afterMove.second);
         }
 
-        else if(dir == LEFT){
-            Log.d("Move", "LEFT");
-            changed=moveLeft();
-            if (changed)
-                update();
+        else if(dir == Directions.LEFT){
+            afterMove=Move.moveLeft(cellValuesOfBoard);
+            if (afterMove.first)
+                update(afterMove.second);
         }
         else{
-            Log.d("Move", "RIGHT");
-            changed=moveRight();
-            if (changed)
-                update();
+            afterMove=Move.moveRight(cellValuesOfBoard);
+            if (afterMove.first)
+                update(afterMove.second);
         }
         return true;
     }
 
+    public Directions direction(float x1,float x2,float y1,float y2){
+        if (Math.abs(x1-x2) > Math.abs(y1-y2)){
+            return x1>x2 ? Directions.LEFT : Directions.RIGHT;
+        }else{
+            return y1>y2 ? Directions.DOWN : Directions.UP;
+        }
+    }
     @SuppressLint("SetTextI18n")
     public void makeCellStyle(AppCompatButton button, int num){
        if(num == 0){
@@ -226,8 +276,8 @@ public class MainActivity extends AppCompatActivity implements ResultFragment.Se
        }
     }
     public void addRandomNum(){
-        if(emptySpaces.isEmpty())
-            isGameOver();
+        if(emptySpaces.isEmpty()||isGameOver())
+            return;
         Random random = new Random();
         int randomNo = random.nextInt(emptySpaces.size());
         int[] randomPosition = emptySpaces.get(randomNo);
@@ -236,34 +286,16 @@ public class MainActivity extends AppCompatActivity implements ResultFragment.Se
         emptySpaces.remove(randomNo);
         int addedRandomNum = random.nextInt(2);
         if(addedRandomNum == 0){
-            cellValuesOfBoard[row][column] = 2;
-        }else{
             cellValuesOfBoard[row][column] = 4;
+        }else{
+            cellValuesOfBoard[row][column] = 2;
         }
         makeCellStyle(cellTextViewOfBoard[row][column],cellValuesOfBoard[row][column]);
     }
 
     @SuppressLint("SetTextI18n")
-    public void restart(){
-        if(scoreValue> sharedPreferences.getLong(high_score,0)){
-            sharedPreferences.edit().putLong(high_score,scoreValue).apply();
-        }
-        for(int row = 0; row<4; row++){
-            for(int column = 0; column<4; column++){
-                int[] emptyPositions={row,column};
-                emptySpaces.add(emptyPositions);
-                cellValuesOfBoard[row][column]=0;
-                makeCellStyle(cellTextViewOfBoard[row][column],cellValuesOfBoard[row][column]);
-            }
-        }
-        scoreValue =0;
-        score.setText(String.valueOf(scoreValue));
-        bestScoreValue = sharedPreferences.getLong(high_score,0);
-        bestScore.setText(String.valueOf(bestScoreValue));
-        addRandomNum();
-        addRandomNum();
-    }
-    void isGameOver(){
+
+    public boolean isGameOver(){
 
         // Check if any tile has a value of 2048.
         for (int i = 0; i < BOARD_SIZE; i++) {
@@ -271,6 +303,7 @@ public class MainActivity extends AppCompatActivity implements ResultFragment.Se
                 if (cellValuesOfBoard[i][j] == 2048) {
                     openResultLayout("YOU WIN!");
                     Log.d("Result", "YOU WIN!");
+                    return false;
                 }
             }
         }
@@ -278,7 +311,7 @@ public class MainActivity extends AppCompatActivity implements ResultFragment.Se
         for (int i = 0; i < BOARD_SIZE; i++) {
             for (int j = 0; j < BOARD_SIZE; j++) {
                 if (cellValuesOfBoard[i][j] == 0) {
-                    return ;
+                    return false;
                 }
             }
         }
@@ -289,12 +322,12 @@ public class MainActivity extends AppCompatActivity implements ResultFragment.Se
 
                 // Check the tile to the right.
                 if (j < BOARD_SIZE - 1 && cellValuesOfBoard[i][j + 1] == currentValue) {
-                    return ;
+                    return false;
                 }
 
                 // Check the tile below.
                 if (i < BOARD_SIZE - 1 && cellValuesOfBoard[i + 1][j] == currentValue) {
-                    return ;
+                    return false;
                 }
             }
         }
@@ -304,21 +337,16 @@ public class MainActivity extends AppCompatActivity implements ResultFragment.Se
         }
         openResultLayout("GAME OVER");
         Log.d("Result", "GAME OVER");
+        return true;
     }
 
-    private void openResultLayout(String msg){
+    public void openResultLayout(String msg){
         resultFragment=ResultFragment.newInstance(msg);
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.frameLayout,resultFragment).commit();
     }
-    public int direction(float x1,float x2,float y1,float y2){
-        if (Math.abs(x1-x2) > Math.abs(y1-y2)){
-            return x1>x2 ? LEFT : RIGHT;
-        }else{
-            return y1>y2 ? DOWN : UP;
-        }
-    }
-    private void updateEmptyCells(){
+
+    public void updateEmptyCells(){
         emptySpaces.clear();
         for(int r =0 ; r<BOARD_SIZE;r++){
             for(int c =0 ; c<BOARD_SIZE;c++){
@@ -328,101 +356,22 @@ public class MainActivity extends AppCompatActivity implements ResultFragment.Se
             }
         }
     }
-    private void updateCells(){
+
+    public void updateCells(){
         for(int r =0 ; r<BOARD_SIZE;r++){
             for(int c =0 ; c<BOARD_SIZE;c++){
                 makeCellStyle(cellTextViewOfBoard[r][c],cellValuesOfBoard[r][c]);
             }
         }
     }
-    public void update(){
+
+    public void update(int[][] boardAfterMove){
+        cellValuesOfBoard=boardAfterMove;
+        score.setText(String.valueOf(Move.score));
         updateEmptyCells();
         addRandomNum();
         updateCells();
         isGameOver();
-    }
-
-    public boolean moveUp(){
-        Log.d("Move", "UP");
-        transpose();
-        boolean changed = moveLeft();
-        transpose();
-        return changed;
-    }
-    public boolean moveDown(){
-        Log.d("Move", "DOWN");
-        transpose();
-        boolean changed = moveRight();
-        transpose();
-        return changed;
-    }
-    public boolean moveRight(){
-        Log.d("Move", "RIGHT");
-       reverse();
-       boolean changed = moveLeft();
-       reverse();
-       return changed;
-    }
-    public boolean moveLeft(){
-        Log.d("Move", "LEFT");
-       boolean firstChange = compress();
-       boolean secChange = merge();
-       boolean thirdChange = compress();
-       return firstChange || secChange || thirdChange;
-    }
-
-
-    private void reverse() {
-        int[][] newBoardValues = new int[4][4];
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 4; j++) {
-                newBoardValues[i][j] = cellValuesOfBoard[i][3 - j];
-            }
-        }
-        cellValuesOfBoard=newBoardValues;
-    }
-    private void transpose() {
-        int[][] newBoardValues = new int[4][4];
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 4; j++) {
-                newBoardValues[i][j] = cellValuesOfBoard[j][i];
-            }
-        }
-        cellValuesOfBoard=newBoardValues;
-    }
-
-    public boolean  merge() {
-        boolean changed = false;
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 3; j++) {
-                if (cellValuesOfBoard[i][j] == cellValuesOfBoard[i][j + 1] && cellValuesOfBoard[i][j] != 0) {
-                    cellValuesOfBoard[i][j] = cellValuesOfBoard[i][j] * 2;
-                    scoreValue+=cellValuesOfBoard[i][j];
-                    score.setText(String.valueOf(scoreValue));
-                    cellValuesOfBoard[i][j + 1] = 0;
-                    changed = true;
-                }
-            }
-        }
-        return changed;
-    }
-    public boolean compress() {
-        boolean changed = false;
-        int[][] newBoardValues = new int[4][4];
-        for (int i = 0; i < 4; i++) {
-            int pos = 0;
-            for (int j = 0; j < 4; j++) {
-                if (cellValuesOfBoard[i][j] != 0) {
-                    newBoardValues[i][pos] = cellValuesOfBoard[i][j];
-                    if (j != pos) {
-                        changed = true;
-                    }
-                    pos++;
-                }
-            }
-        }
-        cellValuesOfBoard=newBoardValues;
-        return changed;
     }
 
     @Override
@@ -461,7 +410,7 @@ public class MainActivity extends AppCompatActivity implements ResultFragment.Se
     protected void onDestroy() {
         super.onDestroy();
         if(scoreValue> sharedPreferences.getLong(high_score,0)){
-            sharedPreferences.edit().putLong(high_score,scoreValue).apply();
+            sharedPreferences.edit().putLong(high_score,Move.score).apply();
         }
     }
 
