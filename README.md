@@ -2,7 +2,7 @@
 
 #### Welcome to the 2048 Game App repository! This is a simple and addictive implementation of the classic 2048 puzzle game, built using Java and designed for Android devices. The game is based on a 4x4 grid where the goal is to combine tiles with the same number to reach the elusive 2048 tile.
 
-[2048 (2).webm](https://github.com/MaiElkhodery/2048-Game/assets/105084125/b45486b7-9073-49ab-9d2c-a645d2e8d38a)
+[2048 Game](https://github.com/MaiElkhodery/2048-Game/assets/105084125/b45486b7-9073-49ab-9d2c-a645d2e8d38a)
 
 ## Key Features:
 #### -Swipe Controls: Use intuitive swipe gestures to move tiles in four directions - up, down, left, and right. The game leverages the GestureDetectorCompat library for smooth and responsive controls.
