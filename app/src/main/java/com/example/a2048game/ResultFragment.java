@@ -14,15 +14,18 @@ import com.example.a2048game.databinding.FragmentResultBinding;
 
 public class ResultFragment extends Fragment {
 
-    private static final String ARG_PARAM = "result";
-    private String resultMSG;
+    private static final String ARG_PARAM1 = "result1";
+    private static final String ARG_PARAM2 = "result2";
+    private String resultMSG1;
+    private String resultMSG2;
     FragmentResultBinding binding;
     SetonClickAgain listener;
 
-    public static ResultFragment newInstance(String resultMSG) {
+    public static ResultFragment newInstance(String resultMSG,String buttonTxt) {
         ResultFragment fragment = new ResultFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM, resultMSG);
+        args.putString(ARG_PARAM1, resultMSG);
+        args.putString(ARG_PARAM2, buttonTxt);
         fragment.setArguments(args);
         return fragment;
     }
@@ -31,7 +34,8 @@ public class ResultFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            resultMSG = getArguments().getString(ARG_PARAM);
+            resultMSG1 = getArguments().getString(ARG_PARAM1);
+            resultMSG2 = getArguments().getString(ARG_PARAM2);
         }
     }
 
@@ -39,7 +43,8 @@ public class ResultFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         binding=FragmentResultBinding.inflate(inflater, container, false);
-        binding.resultTextView.setText(resultMSG+"!");
+        binding.resultTextView.setText(resultMSG1+"!");
+        binding.newGameButton.setText(resultMSG2);
         return binding.getRoot();
     }
 

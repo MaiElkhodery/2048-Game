@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 import android.util.Pair;
 import android.view.GestureDetector;
@@ -17,14 +16,11 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
-import androidx.appcompat.widget.AppCompatImageButton;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GestureDetectorCompat;
 
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
 
 public class MainActivity extends AppCompatActivity implements ResultFragment.SetonClickAgain,GestureDetector.OnGestureListener,View.OnKeyListener{
 
@@ -42,7 +38,6 @@ public class MainActivity extends AppCompatActivity implements ResultFragment.Se
     String FILE_NAME = "highScoreFile";
     String high_score = "highScore";
     private GestureDetectorCompat gestureDetector;
-    private Handler handler = new Handler();
 
     @SuppressLint("SetTextI18n")
     @Override
@@ -52,8 +47,7 @@ public class MainActivity extends AppCompatActivity implements ResultFragment.Se
 
         score = findViewById(R.id.scoreValue_textView);
         bestScore = findViewById(R.id.bestScoreValue_textview);
-        AppCompatImageButton restartButton = findViewById(R.id.newGameButton2);
-        AppCompatImageButton algoButton = findViewById(R.id.algoButton);
+        AppCompatButton restartButton = findViewById(R.id.newGameButton2);
         scoreValue = 0;
         score.setText(scoreValue+"");
 
@@ -88,7 +82,6 @@ public class MainActivity extends AppCompatActivity implements ResultFragment.Se
         bestScore.setText(String.valueOf(bestScoreValue));
 
         restartButton.setOnClickListener(view -> restart());
-        algoButton.setOnClickListener(view -> playWithMinMax());
 
         frameLayout=findViewById(R.id.frameLayout);
         gestureDetector = new GestureDetectorCompat(this, this);
@@ -113,34 +106,42 @@ public class MainActivity extends AppCompatActivity implements ResultFragment.Se
         scoreValue =0;
         score.setText(String.valueOf(scoreValue));
         bestScoreValue = sharedPreferences.getLong(high_score,0);
+        if (bestScoreValue > 10000){
+            bestScore.setTextSize(18);
+        }
         bestScore.setText(String.valueOf(bestScoreValue));
-        addRandomNum();
-        addRandomNum();
+        cellValuesOfBoard=Board.addRandomNum(cellValuesOfBoard);
+        cellValuesOfBoard=Board.addRandomNum(cellValuesOfBoard);
+        updateCells();
     }
-    public void playWithMinMax(){
-        restart();
-        Pair<Directions, int[][]> bestMove;
-        MiniMax miniMaxAlgo = new MiniMax();
-        int i=0;
-        while(!isGameOver()){
-            Log.d("MINMAXLOOP",++i +"");
-            handler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    // Do nothing, just add a delay
+    public void update(int[][] boardAfterMove){
+        cellValuesOfBoard=boardAfterMove.clone();
+        scoreValue = Move.score;
+        if (scoreValue > 10000){
+            score.setTextSize(18);
+        }
+        score.setText(String.valueOf(scoreValue));
+        cellValuesOfBoard=Board.addRandomNum(cellValuesOfBoard);
+        updateCells();
+        if(Board.isGameOver(cellValuesOfBoard)){
+            openResultLayout("GAME OVER","Again");
+        }else{
+            for (int i = 0; i < BOARD_SIZE; i++) {
+                for (int j = 0; j < BOARD_SIZE; j++) {
+                    if (cellValuesOfBoard[i][j] == 2048) {
+                        openResultLayout("YOU WIN!","Continue");
+                        Log.d("Result", "YOU WIN!");
+                    }
                 }
-            }, 1000);
-            bestMove = miniMaxAlgo.getBestMove(cellValuesOfBoard);
-            Log.d("BestMove",bestMove.first.toString());
-            update(bestMove.second);
+            }
         }
     }
-    public void updateMiniMax(int[][] boardAfterMove){
-        cellValuesOfBoard=boardAfterMove;
-        updateEmptyCells();
-        addRandomNum();
-        updateCells();
-        isGameOver();
+    public void updateCells(){
+        for(int r =0 ; r<BOARD_SIZE;r++){
+            for(int c =0 ; c<BOARD_SIZE;c++){
+                makeCellStyle(cellTextViewOfBoard[r][c],cellValuesOfBoard[r][c]);
+            }
+        }
     }
     @Override
     public boolean onKey(View view, int keyCode, KeyEvent event) {
@@ -268,111 +269,25 @@ public class MainActivity extends AppCompatActivity implements ResultFragment.Se
                break;
            case 1024:
                button.setBackgroundTintList(ContextCompat.getColorStateList(getApplicationContext(), R.color.Color1024));
-               button.setTextColor(getResources().getColor(R.color.black));
+               button.setTextColor(getResources().getColor(R.color.White));
+               button.setTextSize(22);
                break;
            default:
                button.setBackgroundTintList(ContextCompat.getColorStateList(getApplicationContext(), R.color.Color2048));
-               button.setTextColor(getResources().getColor(R.color.black));
+               button.setTextColor(getResources().getColor(R.color.White));
+               button.setTextSize(22);
        }
-    }
-    public void addRandomNum(){
-        if(emptySpaces.isEmpty()||isGameOver())
-            return;
-        Random random = new Random();
-        int randomNo = random.nextInt(emptySpaces.size());
-        int[] randomPosition = emptySpaces.get(randomNo);
-        int row = randomPosition[0];
-        int column = randomPosition[1];
-        emptySpaces.remove(randomNo);
-        int addedRandomNum = random.nextInt(2);
-        if(addedRandomNum == 0){
-            cellValuesOfBoard[row][column] = 4;
-        }else{
-            cellValuesOfBoard[row][column] = 2;
-        }
-        makeCellStyle(cellTextViewOfBoard[row][column],cellValuesOfBoard[row][column]);
     }
 
     @SuppressLint("SetTextI18n")
 
-    public boolean isGameOver(){
 
-        // Check if any tile has a value of 2048.
-        for (int i = 0; i < BOARD_SIZE; i++) {
-            for (int j = 0; j < BOARD_SIZE; j++) {
-                if (cellValuesOfBoard[i][j] == 2048) {
-                    openResultLayout("YOU WIN!");
-                    Log.d("Result", "YOU WIN!");
-                    return false;
-                }
-            }
-        }
-        // Check if there are any empty tiles on the board.
-        for (int i = 0; i < BOARD_SIZE; i++) {
-            for (int j = 0; j < BOARD_SIZE; j++) {
-                if (cellValuesOfBoard[i][j] == 0) {
-                    return false;
-                }
-            }
-        }
-        // Check if there are any adjacent tiles with the same value.
-        for (int i = 0; i < BOARD_SIZE; i++) {
-            for (int j = 0; j < BOARD_SIZE; j++) {
-                int currentValue = cellValuesOfBoard[i][j];
-
-                // Check the tile to the right.
-                if (j < BOARD_SIZE - 1 && cellValuesOfBoard[i][j + 1] == currentValue) {
-                    return false;
-                }
-
-                // Check the tile below.
-                if (i < BOARD_SIZE - 1 && cellValuesOfBoard[i + 1][j] == currentValue) {
-                    return false;
-                }
-            }
-        }
-
-        if(scoreValue> sharedPreferences.getLong(high_score,0)){
-            sharedPreferences.edit().putLong(high_score,scoreValue).apply();
-        }
-        openResultLayout("GAME OVER");
-        Log.d("Result", "GAME OVER");
-        return true;
-    }
-
-    public void openResultLayout(String msg){
-        resultFragment=ResultFragment.newInstance(msg);
+    public void openResultLayout(String msg1,String msg2){
+        resultFragment=ResultFragment.newInstance(msg1,msg2);
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.frameLayout,resultFragment).commit();
     }
 
-    public void updateEmptyCells(){
-        emptySpaces.clear();
-        for(int r =0 ; r<BOARD_SIZE;r++){
-            for(int c =0 ; c<BOARD_SIZE;c++){
-                if(cellValuesOfBoard[r][c] == 0){
-                    emptySpaces.add(new int[]{r,c});
-                }
-            }
-        }
-    }
-
-    public void updateCells(){
-        for(int r =0 ; r<BOARD_SIZE;r++){
-            for(int c =0 ; c<BOARD_SIZE;c++){
-                makeCellStyle(cellTextViewOfBoard[r][c],cellValuesOfBoard[r][c]);
-            }
-        }
-    }
-
-    public void update(int[][] boardAfterMove){
-        cellValuesOfBoard=boardAfterMove;
-        score.setText(String.valueOf(Move.score));
-        updateEmptyCells();
-        addRandomNum();
-        updateCells();
-        isGameOver();
-    }
 
     @Override
     public void again(ResultFragment fragment) {
